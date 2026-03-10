@@ -1,0 +1,18 @@
+# Environments
+.venv
+venv/
+ENV/
+env/
+bin/
+lib/
+
+# Anaconda/Conda
+anaconda3/
+.conda/
+
+# Python Bytecode
+__pycache__/
+*.py[cod]
+
+#PyCharm
+.idea/
