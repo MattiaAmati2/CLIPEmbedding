@@ -1,4 +1,4 @@
-name: base
+name: CLIP
 channels:
   - defaults
   - nvidia
@@ -651,5 +651,4 @@ dependencies:
   - zope.interface=8.0.1=py313hee96239_0
   - zstandard=0.24.0=py313h3d778a8_0
   - zstd=1.5.7=h11fc155_0
-  - torch
 prefix: /home/mattia/anaconda3

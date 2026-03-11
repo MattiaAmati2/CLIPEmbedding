@@ -77,7 +77,7 @@ def main():
             "images": torch.cat(image_embeddings),
             "texts": torch.cat(text_embeddings)
         }
-        torch.save(embeddings_dict, f"{args.dataset.replace('/', '_')}_{key}_embeddings.pt")
+        torch.save(embeddings_dict, f"{args.model.replace('/', '-')}__{args.dataset.replace('/', '-')}__{key}__embeddings.pt")
 
 
 if __name__ == "__main__":
