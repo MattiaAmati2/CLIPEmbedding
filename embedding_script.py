@@ -28,7 +28,7 @@ def main():
 
     parser.add_argument("--model", type=str, required=True, choices = ["openai/clip-vit-base-patch16",
                                                                                    "openai/clip-vit-base-patch32"])
-    parser.add_argument("--dataset", type=str, default = "enterprise-explorers/oxford-pets")
+    parser.add_argument("--dataset", type=str, required=True)
 
     args : argparse.Namespace = parser.parse_args()
 
@@ -63,7 +63,7 @@ def main():
 
 
     for key in dataset_splits:
-        data_loader = torch.utils.data.DataLoader(dataset_splits[key], batch_size=32, shuffle=False, num_workers=1)
+        data_loader = torch.utils.data.DataLoader(dataset_splits[key], batch_size=512, shuffle=False, num_workers=8)
         image_embeddings = []
         text_embeddings = []
         for batch in tqdm(data_loader, desc = "Computing split: " + key):
