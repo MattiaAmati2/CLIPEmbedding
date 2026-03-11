@@ -14,5 +14,8 @@ anaconda3/
 __pycache__/
 *.py[cod]
 
-#PyCharm
+# PyCharm
 .idea/
+
+# PyTorch Computation Outputs
+*.pt

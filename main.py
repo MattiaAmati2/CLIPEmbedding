@@ -1,5 +1,5 @@
 import argparse
-
+from tqdm import tqdm
 import datasets
 import torch
 from datasets import load_dataset
@@ -66,7 +66,7 @@ def main():
         data_loader = torch.utils.data.DataLoader(dataset_splits[key], batch_size=32, shuffle=False, num_workers=1)
         image_embeddings = []
         text_embeddings = []
-        for batch in data_loader:
+        for batch in tqdm(data_loader, desc = "Computing split: " + key):
             image_result, text_result = compute_embeddings(batch["pixel_values"],
                                                            batch["input_ids"],
                                                            batch["attention_mask"])
