@@ -17,11 +17,14 @@ def main():
 
     similarity_scores = image_embeddings @ text_embeddings.T
 
-    predicted_indices = similarity_scores.argmax(dim=1)
+    predictions = similarity_scores.argmax(dim=1)
 
-    predicted_labels = [class_names[idx.item()] for idx in predicted_indices]
-    print(classification_report(ground_truth_labels, predicted_labels))
+    predictions = [class_names[idx.item()] for idx in predictions]
 
+    if not isinstance(ground_truth_labels[0], str):
+        ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
+
+    print(classification_report(ground_truth_labels, predictions))
 
 
 if __name__ == "__main__":

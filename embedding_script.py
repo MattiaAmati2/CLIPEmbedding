@@ -29,9 +29,13 @@ def main():
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--model", type=str, required=True, choices = ["openai/clip-vit-base-patch16",
                                                                                    "openai/clip-vit-base-patch32"])
+    parser.add_argument("--label_col", type=str, default=None,
+                        help="The specific text/label column to use (e.g. fine_label)")
     args = parser.parse_args()
 
     image_label, text_label = find_supervised_keys(args.dataset)
+    if args.label_col is not None:
+        text_label = args.label_col
 
     model = CLIPModel.from_pretrained(args.model)
     model.to(device)
