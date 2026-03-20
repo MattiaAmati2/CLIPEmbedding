@@ -29,9 +29,13 @@ def main():
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--model", type=str, required=True, choices = ["openai/clip-vit-base-patch16",
                                                                                    "openai/clip-vit-base-patch32"])
+    parser.add_argument("--label_col", type=str, default=None,
+                        help="The specific text/label column to use (e.g. fine_label)")
     args = parser.parse_args()
 
     image_label, text_label = find_supervised_keys(args.dataset)
+    if args.label_col is not None:
+        text_label = args.label_col
 
     model = CLIPModel.from_pretrained(args.model)
     model.to(device)
@@ -55,6 +59,10 @@ def main():
     if isinstance(label_translator, datasets.ClassLabel):
         unique_labels = label_translator.int2str(unique_labels)
 
+    results_dict = {
+        "class_names" : unique_labels,
+    }
+
     unique_labels = [f"A photo of a {label}" for label in unique_labels]
     processed_labels = processor(text = unique_labels, return_tensors="pt", padding = True).to(device)
     text_embeddings = model.get_text_features(**processed_labels).cpu()
@@ -75,14 +83,12 @@ def main():
                 image_embeddings.append(model.get_image_features(image_batch).cpu())
                 text_labels.extend(batch[text_label])
 
-        results_dict = {
-            "image_embeddings": torch.cat(image_embeddings),
-            "text_embeddings" : torch.nn.functional.normalize(text_embeddings, p=2, dim=1),
-            "labels": text_labels,
-            "class_names" : unique_labels
-        }
+        results_dict["image_embeddings"] = torch.cat(image_embeddings)
+        results_dict["text_embeddings"] = torch.nn.functional.normalize(text_embeddings, p=2, dim=1)
+        results_dict["labels"] = text_labels
 
         results_dict["image_embeddings"] = torch.nn.functional.normalize(results_dict["image_embeddings"], p=2, dim=1)
+
         torch.save(results_dict, f"{args.model.replace('/', '-')}__{args.dataset.replace('/', '-')}__{key}__embeddings.pt")
 
 if __name__ == "__main__":
