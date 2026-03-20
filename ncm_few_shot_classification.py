@@ -29,11 +29,9 @@ def get_class_means(train_file, shot_number):
         class_means.append(class_mean)
 
     samples_matrix = torch.stack(class_means)
-
     samples_matrix = torch.nn.functional.normalize(samples_matrix, p=2, dim=1)
 
     return samples_matrix, unique_labels
-
 
 
 def main():
@@ -48,12 +46,14 @@ def main():
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
+    if not isinstance(ground_truth_labels[0], str):
+        ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
+
     predictions = []
 
     extractions_number = 5
     accuracies= []
     f1_scores = []
-
 
     for i in range(extractions_number):
 
@@ -62,9 +62,6 @@ def main():
         predictions = similarity_scores.argmax(dim=1)
 
         predictions = [class_names[idx.item()] for idx in predictions]
-
-        if not isinstance(ground_truth_labels[0], str):
-            ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
@@ -75,7 +72,6 @@ def main():
 
     print("\n=== FINAL RESULTS ===")
     print(f"Accuracy:  {mu_acc:.4f} ± {std_acc:.4f} (Variance: {var_acc:.6f})")
-
 
     print("\nSample Report (from final trial):")
     print(classification_report(ground_truth_labels, predictions))
