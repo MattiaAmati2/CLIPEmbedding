@@ -12,3 +12,12 @@ The output of this script is composed by one file for each split of the provided
 - "labels": the raw label corresponding to each image 
 
 These files are saved in the same directory as the embedding_script.py file, as "[model]\__[dataset]\__[split]\__embeddings.pt"
+
+## Implementation of basic classification techniques from the CLIP embeddings
+
+Three basic classification methods are implemented, to find the actual accuracy of the CLIP model.
+1. Zero-shot classification: python zero_shot_classification.py --filename [filename]
+2. Nearest class mean few shot classification: python ncm_few_shot_classification.py --train_filename [filename] --test_filename [filename] --shot_number [shots]
+3. A variation of the previous implementation, using Mahalanobis distance instead of cosine similiarity: python mahalanobis_distance_ncm.py --train_filename [filename] --test_filename [filename] --shot_number [shots]
+
+All these commands require files produced using the previously described embedding script. 
