@@ -2,7 +2,9 @@
 
 To use this script, run python embedding_script.py --model [model] --dataset [dataset] --label_col [column_name]. <br>
 The --model argument is required, and can be "openai/clip-vit-base-patch16" or "openai/clip-vit-base-patch32". <br>
-The --dataset argument is also required, and it has to be a valid Hugging Face dataset ID. <br>
+The --dataset_id and --dataset_path arguments are mutually exclusive with each other, and they can respectively represent a valid Hugging Face dataset id 
+or the local path to a dataset's main directory <br>
+
 The --label-col argument is optional, and can be used to specify the name of the labels column
 
 The output of this script is composed by one file for each split of the provided dataset, structured in a dictionary with the following columns:
@@ -18,6 +20,6 @@ These files are saved in the same directory as the embedding_script.py file, as 
 Three basic classification methods are implemented, to find the actual accuracy of the CLIP model.
 1. Zero-shot classification: python zero_shot_classification.py --filename [filename]
 2. Nearest class mean few shot classification: python ncm_few_shot_classification.py --train_filename [filename] --test_filename [filename] --shot_number [shots]
-3. A variation of the previous implementation, using Mahalanobis distance instead of cosine similiarity: python mahalanobis_distance_ncm.py --train_filename [filename] --test_filename [filename] --shot_number [shots]
+3. A variation of the previous implementation, using Mahalanobis distance instead of cosine similarity: python mahalanobis_distance_ncm.py --train_filename [filename] --test_filename [filename] --shot_number [shots]
 
 All these commands require files produced using the previously described embedding script. 

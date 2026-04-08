@@ -1,15 +1,16 @@
 import argparse
+import os
 from tqdm import tqdm
 import datasets
 import torch
 from datasets import load_dataset
 from transformers import CLIPModel, CLIPProcessor
 
-def find_supervised_keys(dataset):
+def find_supervised_keys(features):
     image_label = "image"
     text_label = "label"
     class_label_found = False
-    features = datasets.get_dataset_config_info(dataset).features
+
     for key in features:
         if isinstance(features[key], datasets.ClassLabel):
             text_label = key
@@ -26,14 +27,30 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--model", type=str, required=True, choices = ["openai/clip-vit-base-patch16",
                                                                                    "openai/clip-vit-base-patch32"])
+
     parser.add_argument("--label_col", type=str, default=None,
                         help="The specific text/label column to use (e.g. fine_label)")
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--dataset_id", type=str, help="A valid Hugging Face ID")
+    group.add_argument("--dataset_path", type=str, help="A local path for imagefolder")
+
     args = parser.parse_args()
 
-    image_label, text_label = find_supervised_keys(args.dataset)
+    if args.dataset_path:
+        dataset_splits = load_dataset("imagefolder", data_dir=args.dataset_path)
+        dataset_name = os.path.basename(os.path.normpath(args.dataset_path))
+    else:
+        dataset_splits = load_dataset(args.dataset_id)
+        dataset_name = args.dataset_id
+
+    splits = list(dataset_splits.keys())
+    first_split = splits[0]
+
+    features = dataset_splits[first_split].features
+    image_label, text_label = find_supervised_keys(features)
     if args.label_col is not None:
         text_label = args.label_col
 
@@ -41,33 +58,27 @@ def main():
     model.to(device)
     processor = CLIPProcessor.from_pretrained(args.model)
 
-    label_translator = datasets.get_dataset_config_info(args.dataset).features[text_label]
+    label_feature = features[text_label]
+
+    if isinstance(label_feature, datasets.ClassLabel):
+        unique_labels = label_feature.names
+    else:
+        unique_labels = sorted(list(set(dataset_splits[first_split][text_label])))
+
+    results_dict = {
+        "class_names": unique_labels,
+    }
+
+    text_prompts = [f"A photo of a {label.replace("_", " ")}" for label in unique_labels]
+
+    processed_labels = processor(text=text_prompts, return_tensors="pt", padding=True).to(device)
+    text_embeddings = model.get_text_features(**processed_labels).cpu()
 
     def image_preprocess(raw_batch):
         processed_images = processor(images = raw_batch[image_label], return_tensors="pt", padding=True)
         processed_images[text_label] = raw_batch[text_label]
 
         return processed_images
-
-    splits = datasets.get_dataset_split_names(args.dataset)
-    dataset_splits = {}
-    for split in splits:
-        dataset_splits[split] = load_dataset(args.dataset, split=split)
-
-    unique_labels = sorted(list(set(dataset_splits["train"][text_label])))
-
-    if isinstance(label_translator, datasets.ClassLabel):
-        unique_labels = label_translator.int2str(unique_labels)
-
-    results_dict = {
-        "class_names" : unique_labels,
-    }
-
-    unique_labels = [f"A photo of a {label}" for label in unique_labels]
-    processed_labels = processor(text = unique_labels, return_tensors="pt", padding = True).to(device)
-    text_embeddings = model.get_text_features(**processed_labels).cpu()
-
-    print("text_embeddings.shape", text_embeddings.shape)
 
     for split in splits:
         dataset_splits[split] = dataset_splits[split].with_transform(image_preprocess)
@@ -83,13 +94,14 @@ def main():
                 image_embeddings.append(model.get_image_features(image_batch).cpu())
                 text_labels.extend(batch[text_label])
 
-        results_dict["image_embeddings"] = torch.cat(image_embeddings)
-        results_dict["text_embeddings"] = torch.nn.functional.normalize(text_embeddings, p=2, dim=1)
-        results_dict["labels"] = text_labels
+        split_results = results_dict.copy()
+        split_results["image_embeddings"] = torch.cat(image_embeddings)
+        split_results["text_embeddings"] = torch.nn.functional.normalize(text_embeddings, p=2, dim=1)
+        split_results["labels"] = text_labels
 
-        results_dict["image_embeddings"] = torch.nn.functional.normalize(results_dict["image_embeddings"], p=2, dim=1)
+        split_results["image_embeddings"] = torch.nn.functional.normalize(split_results["image_embeddings"], p=2, dim=1)
 
-        torch.save(results_dict, f"{args.model.replace('/', '-')}__{args.dataset.replace('/', '-')}__{key}__embeddings.pt")
+        torch.save(split_results, f"{args.model.replace('/', '-')}__{dataset_name.replace('/', '-')}__{key}__embeddings.pt")
 
 if __name__ == "__main__":
     main()
