@@ -1,8 +1,9 @@
 import argparse
 import random
 import torch
-import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.metrics import accuracy_score, f1_score
+
+from data_collection import save_results
 
 
 def get_class_means_and_inv_covariance_matrices(train_file, shot_number):
@@ -70,12 +71,9 @@ def main():
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
-    predictions = []
-
-    extractions_number = 5
+    extractions_number = 8
     accuracies= []
     f1_scores = []
-
 
     for i in range(extractions_number):
 
@@ -91,15 +89,8 @@ def main():
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-    mu_acc = np.mean(accuracies)
-    var_acc = np.var(accuracies)
-    std_acc = np.std(accuracies)
+    save_results("mahalanobis_distance_classification_results.csv", args.shot_number, extractions_number, accuracies, f1_scores)
 
-    print("\n=== FINAL RESULTS ===")
-    print(f"Accuracy:  {mu_acc:.4f} ± {std_acc:.4f} (Variance: {var_acc:.6f})")
-
-    print("\nSample Report (from final trial):")
-    print(classification_report(ground_truth_labels, predictions))
 
 if __name__ == '__main__':
     main()
