@@ -49,6 +49,7 @@ def main():
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
+    predictions = []
     extractions_number = 8
     accuracies= []
     f1_scores = []
@@ -64,7 +65,9 @@ def main():
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-    save_results("ncm_few_shot_classification_results.csv", args.shot_number, extractions_number, accuracies, f1_scores)
+    save_results("results/ncm_few_shot_classification_results.csv", args.shot_number, extractions_number, accuracies, f1_scores)
+
+    print(classification_report(ground_truth_labels, predictions, digits=4))
 
 if __name__ == '__main__':
     main()

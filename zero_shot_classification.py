@@ -24,7 +24,7 @@ def main():
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
-    print(classification_report(ground_truth_labels, predictions))
+    print(classification_report(ground_truth_labels, predictions, digits=4))
 
 
 if __name__ == "__main__":
