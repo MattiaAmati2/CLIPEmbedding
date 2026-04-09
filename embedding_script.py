@@ -101,7 +101,7 @@ def main():
 
         split_results["image_embeddings"] = torch.nn.functional.normalize(split_results["image_embeddings"], p=2, dim=1)
 
-        torch.save(split_results, f"{args.model.replace('/', '-')}__{dataset_name.replace('/', '-')}__{key}__embeddings.pt")
+        torch.save(split_results, f"sources/{args.model.replace('/', '-')}_{dataset_name.replace('/', '-')}_{key}_embeddings.pt")
 
 if __name__ == "__main__":
     main()

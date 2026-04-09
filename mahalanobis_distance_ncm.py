@@ -1,7 +1,7 @@
 import argparse
 import random
 import torch
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 from data_collection import save_results
 
@@ -70,6 +70,7 @@ def main():
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
     extractions_number = 16
+    predictions = []
     accuracies = []
     f1_scores = []
 
@@ -89,6 +90,7 @@ def main():
     save_results("results/mahalanobis_distance_ncm_classification_results.csv", args.shot_number, extractions_number,
                  accuracies, f1_scores)
 
+    print(classification_report(ground_truth_labels, predictions, digits=4))
 
 if __name__ == '__main__':
     main()
