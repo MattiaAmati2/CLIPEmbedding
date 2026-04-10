@@ -50,7 +50,7 @@ def main():
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
     predictions = []
-    extractions_number = 8
+    extractions_number = 16
     accuracies= []
     f1_scores = []
 
