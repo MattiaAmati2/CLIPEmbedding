@@ -30,7 +30,7 @@ def save_results(filename, shot_number, extractions_number, accuracies, f1_score
         if not file_exists:
             writer.writerow([
                 "shot_number",
-                "extractions_number",
+                "",
                 "mu_acc",
                 "var_acc",
                 "std_acc",

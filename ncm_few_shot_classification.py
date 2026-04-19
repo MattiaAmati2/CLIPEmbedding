@@ -1,38 +1,9 @@
 import argparse
-import random
 import torch
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 from data_collection import save_results
-
-def get_class_means(train_file, shot_number):
-    image_embeddings = train_file["image_embeddings"]
-    labels = train_file["labels"]
-
-    #turn the labels from monodimensional tensors to integers to avoid extremely long computation time
-    if isinstance(labels[0], torch.Tensor):
-        labels = [lbl.item() for lbl in labels]
-
-    unique_labels = list(set(labels))
-    unique_labels.sort()
-
-    class_means = []
-
-    for label in unique_labels:
-        valid_indices = [i for i, current_label in enumerate(labels) if current_label == label]
-
-        selected_indices = random.sample(valid_indices, shot_number)
-
-        selected_embeddings = image_embeddings[selected_indices]
-
-        class_mean = selected_embeddings.mean(dim=0)
-        class_means.append(class_mean)
-
-    samples_matrix = torch.stack(class_means)
-    samples_matrix = torch.nn.functional.normalize(samples_matrix, p=2, dim=1)
-
-    return samples_matrix, unique_labels
-
+from classification_preprocessing import get_class_means
 
 def main():
     parser = argparse.ArgumentParser()
@@ -56,7 +27,7 @@ def main():
 
     for i in range(extractions_number):
 
-        samples_matrix, ordered_train_labels = get_class_means(train_file, args.shot_number)
+        samples_matrix = get_class_means(train_file, args.shot_number)
         similarity_scores = test_file["image_embeddings"] @ samples_matrix.T
         predictions = similarity_scores.argmax(dim=1)
 

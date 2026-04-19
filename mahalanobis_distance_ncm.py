@@ -1,58 +1,9 @@
 import argparse
-import random
 import torch
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 from data_collection import save_results
-
-
-def get_class_means_and_inv_covariance_matrices(train_file, shot_number):
-    image_embeddings = train_file["image_embeddings"]
-    labels = train_file["labels"]
-
-    if isinstance(labels[0], torch.Tensor):
-        labels = [lbl.item() for lbl in labels]
-
-    unique_labels = list(set(labels))
-    unique_labels.sort()
-
-    class_means = []
-    class_matrices = []
-
-    for label in unique_labels:
-        valid_indices = [i for i, current_label in enumerate(labels) if current_label == label]
-
-        selected_indices = random.sample(valid_indices, shot_number)
-
-        selected_embeddings = image_embeddings[selected_indices]
-
-        class_mean = selected_embeddings.mean(dim=0)
-        class_means.append(class_mean)
-
-        #regularize the covariance matrix to allow its inversion
-        cov_matrix = torch.cov(selected_embeddings.T)
-        cov_matrix += 10 ** (-2) * torch.eye(512)
-
-        class_matrices.append(torch.linalg.inv(cov_matrix))
-
-    samples_matrix = torch.stack(class_means)
-
-    return samples_matrix, unique_labels, class_matrices
-
-
-def mahalanobis_distance(test_examples, class_means, covariance_matrices):
-    all_distances = []
-
-    #compute the distance from a single class of all the examples at once
-    for class_idx in range(len(class_means)):
-        mean = class_means[class_idx]
-        inv_cov = covariance_matrices[class_idx]
-
-        distances = torch.sum((test_examples - mean) @ inv_cov * (test_examples - mean), dim=1)
-        all_distances.append(distances)
-
-    return torch.stack(all_distances, dim=1)
-
+from classification_preprocessing import get_class_means_and_inv_covariance_matrices, mahalanobis_distance
 
 def main():
     parser = argparse.ArgumentParser()
@@ -75,8 +26,7 @@ def main():
     f1_scores = []
 
     for i in range(extractions_number):
-        class_means, unique_labels, class_matrices = get_class_means_and_inv_covariance_matrices(train_file,
-                                                                                                 args.shot_number)
+        class_means, class_matrices = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number)
 
         distance_matrix = mahalanobis_distance(test_file["image_embeddings"], class_means, class_matrices)
 
