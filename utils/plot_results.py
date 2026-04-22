@@ -36,7 +36,7 @@ def main():
     for group_name, group_df in grouped_data:
         group_df = group_df.sort_values(by=args.x)
 
-        plt.plot(group_df[args.x], group_df[args.y], marker='o', linewidth=2, label=f"{args.group}: {group_name}")
+        plt.plot(group_df[args.x], group_df[args.y], marker='', linewidth=2, label=f"{args.group}: {group_name}")
 
     plt.xlabel(args.x, fontsize=12, fontweight='bold')
     plt.ylabel(args.y, fontsize=12, fontweight='bold')

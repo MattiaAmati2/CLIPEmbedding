@@ -2,8 +2,8 @@ import argparse
 import torch
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
-from data_collection import save_results
-from classification_preprocessing import get_class_means
+from utils.data_collection import save_results
+from utils.classification_preprocessing import get_class_means_and_inv_covariance_matrices, mahalanobis_distance
 
 def main():
     parser = argparse.ArgumentParser()
@@ -20,23 +20,25 @@ def main():
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
-    predictions = []
     extractions_number = 16
-    accuracies= []
+    predictions = []
+    accuracies = []
     f1_scores = []
 
     for i in range(extractions_number):
+        class_means, class_matrices = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number)
 
-        samples_matrix = get_class_means(train_file, args.shot_number)
-        similarity_scores = test_file["image_embeddings"] @ samples_matrix.T
-        predictions = similarity_scores.argmax(dim=1)
+        distance_matrix = mahalanobis_distance(test_file["image_embeddings"], class_means, class_matrices)
+
+        predictions = (distance_matrix.argmin(dim=1))
 
         predictions = [class_names[idx.item()] for idx in predictions]
 
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-    save_results("results/ncm_few_shot_classification_results.csv", args.shot_number, extractions_number, accuracies, f1_scores)
+    save_results("../results/baseline/mahalanobis_distance_ncm_classification_results.csv", args.shot_number, extractions_number,
+                 accuracies, f1_scores)
 
     print(classification_report(ground_truth_labels, predictions, digits=4))
 

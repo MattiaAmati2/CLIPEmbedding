@@ -1,9 +1,10 @@
 import argparse
 import torch
+from collections import defaultdict
 from sklearn.metrics import accuracy_score, f1_score
 
-from classification_preprocessing import get_class_means, get_segment_points
-from data_collection import save_results
+from utils.classification_preprocessing import get_class_means, get_segment_points
+from utils.data_collection import save_results
 
 
 def main():
@@ -23,26 +24,25 @@ def main():
 
     text_embeddings = train_file["text_embeddings"]
     extractions_number = 16
-    interpolated_points = 16
+    interpolated_points = 128
 
-    accuracies = []
-    f1_scores = []
+    accuracies = defaultdict(list)
+    f1_scores = defaultdict(list)
 
-    for i in range(interpolated_points):
-        for j in range(extractions_number):
-            samples_matrix  = get_class_means(train_file, args.shot_number)
-
+    for j in range(extractions_number):
+        samples_matrix = get_class_means(train_file, args.shot_number)
+        for i in range(interpolated_points):
             points = get_segment_points(text_embeddings, samples_matrix, interpolated_points)
 
             similarity_scores = test_file["image_embeddings"] @ points[:, i, :].T
             predictions = similarity_scores.argmax(dim=1)
             predictions = [class_names[idx.item()] for idx in predictions]
 
-            accuracies.append(accuracy_score(ground_truth_labels, predictions))
-            f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
+            accuracies[i + 1].append(accuracy_score(ground_truth_labels, predictions))
+            f1_scores[i + 1].append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-        save_results("results/interpolation_experiment.csv", args.shot_number, i,
-                     accuracies, f1_scores)
+    for key in accuracies.keys():
+        save_results(f"results/interpolation_experiment_{args.shot_number}_shots_{interpolated_points}_points.csv", args.shot_number, key, accuracies[key], f1_scores[key])
 
 if __name__ == '__main__':
     main()
