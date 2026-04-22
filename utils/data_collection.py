@@ -89,7 +89,7 @@ def extract_optimal_metrics(metric_dict, exp_name, metric_label):
     variance_per_class = final_var_array[points_selected, column_indices]
     deviation_per_class = final_std_array[points_selected, column_indices]
 
-    points_selected = np.append(points_selected, -1)
+    points_selected = np.append(points_selected, np.mean(points_selected))
     scores_for_points = np.append(scores_for_points, np.mean(scores_for_points))
     variance_per_class = np.append(variance_per_class, np.mean(variance_per_class))
     deviation_per_class = np.append(deviation_per_class, np.mean(deviation_per_class))
@@ -97,8 +97,8 @@ def extract_optimal_metrics(metric_dict, exp_name, metric_label):
     columns_to_add = {
 
         f"{exp_name}_avg_{metric_label}": np.round(scores_for_points, 4),
-     #   f"{exp_name}_{metric_label}_variance": np.round(variance_per_class, 6),
-      #  f"{exp_name}_{metric_label}_deviation": np.round(deviation_per_class, 6),
+        #f"{exp_name}_{metric_label}_variance": np.round(variance_per_class, 6),
+        #f"{exp_name}_{metric_label}_deviation": np.round(deviation_per_class, 6),
         f"{exp_name}_{metric_label}_step": points_selected
     }
 

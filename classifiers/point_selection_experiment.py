@@ -49,7 +49,7 @@ def main():
     class_names.append("OVERALL_AVERAGE")
 
     append_columns_to_csv(
-        filename="../results/optimal_points_tracker.csv",
+        filename="results/optimal_points_tracker.csv",
         class_names=class_names,
         new_columns_dict={**f1_columns, **recall_columns}
     )

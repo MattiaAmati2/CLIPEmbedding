@@ -23,7 +23,7 @@ do
     echo "======================================"
     echo "Running extraction for $shots shots..."
 
-    python "$PYTHON_SCRIPT" --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
+    PYTHONPATH=$(pwd) python "$PYTHON_SCRIPT" --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
 done
 
 echo "======================================"
