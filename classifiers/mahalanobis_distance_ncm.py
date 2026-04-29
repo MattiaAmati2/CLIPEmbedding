@@ -1,5 +1,6 @@
 import argparse
 import torch
+import os
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 from utils.data_collection import save_results
@@ -14,6 +15,8 @@ def main():
     args = parser.parse_args()
     train_file = torch.load(args.train_filename)
     test_file = torch.load(args.test_filename)
+
+    dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
@@ -37,7 +40,7 @@ def main():
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-    save_results("../results/baseline/mahalanobis_distance_ncm_classification_results.csv", args.shot_number, extractions_number,
+    save_results(f"../results/mahalanobis_ncm_{dataset_prefix}_results.csv", args.shot_number, extractions_number,
                  accuracies, f1_scores)
 
     print(classification_report(ground_truth_labels, predictions, digits=4))

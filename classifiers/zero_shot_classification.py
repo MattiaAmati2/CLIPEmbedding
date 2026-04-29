@@ -1,4 +1,6 @@
 import torch
+import os
+import pandas as pd
 import argparse
 
 from sklearn.metrics import classification_report
@@ -24,7 +26,17 @@ def main():
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
-    print(classification_report(ground_truth_labels, predictions, digits=4))
+    report_dict = classification_report(ground_truth_labels, predictions, output_dict=True, digits=4)
+
+    report_df = pd.DataFrame(report_dict).transpose()
+    dataset_prefix = os.path.basename(args.test_filename).replace("_test_embeddings.pt", "")
+    save_path = f"results/{dataset_prefix}_zero_shot_report.csv"
+
+    os.makedirs("results", exist_ok=True)
+
+    report_df.to_csv(save_path, index=True, index_label="Class_Name")
+
+    print(f"[+] Zero-Shot classification report saved to: {save_path}")
 
 
 if __name__ == "__main__":

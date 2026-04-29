@@ -1,5 +1,5 @@
 import argparse
-
+import os
 import torch
 from collections import defaultdict
 from sklearn.metrics import recall_score, f1_score
@@ -17,6 +17,8 @@ def main():
     args = parser.parse_args()
     train_file = torch.load(args.train_filename)
     test_file = torch.load(args.test_filename)
+
+    dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
@@ -49,7 +51,7 @@ def main():
     class_names.append("OVERALL_AVERAGE")
 
     append_columns_to_csv(
-        filename="results/optimal_points_tracker.csv",
+        filename=f"results/{dataset_prefix}_optimal_points.csv",
         class_names=class_names,
         new_columns_dict={**f1_columns, **recall_columns}
     )

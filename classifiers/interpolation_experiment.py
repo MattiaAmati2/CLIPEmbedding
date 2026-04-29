@@ -1,5 +1,6 @@
 import argparse
 import torch
+import os
 from collections import defaultdict
 from sklearn.metrics import accuracy_score, f1_score
 
@@ -16,6 +17,8 @@ def main():
     args = parser.parse_args()
     train_file = torch.load(args.train_filename)
     test_file = torch.load(args.test_filename)
+
+    dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
@@ -42,7 +45,7 @@ def main():
             f1_scores[i + 1].append(f1_score(ground_truth_labels, predictions, average="macro"))
 
     for key in accuracies.keys():
-        save_results(f"results/interpolation_experiment_{args.shot_number}_shots_{interpolated_points}_points.csv", args.shot_number, key, accuracies[key], f1_scores[key])
+        save_results(f"results/interpolation_experiment_{dataset_prefix}_{args.shot_number}_shots_{interpolated_points}_points.csv", args.shot_number, key, accuracies[key], f1_scores[key])
 
 if __name__ == '__main__':
     main()
