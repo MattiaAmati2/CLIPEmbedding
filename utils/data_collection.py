@@ -27,6 +27,10 @@ def save_results(filename, shot_number, extractions_number, accuracies, f1_score
         round(std_f1, 4)
     ]
 
+    directory = os.path.dirname(filename)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
     with open(filename, mode='a', newline='') as file:
         writer = csv.writer(file)
 
@@ -97,8 +101,8 @@ def extract_optimal_metrics(metric_dict, exp_name, metric_label):
     columns_to_add = {
 
         f"{exp_name}_avg_{metric_label}": np.round(scores_for_points, 4),
-        #f"{exp_name}_{metric_label}_variance": np.round(variance_per_class, 6),
-        #f"{exp_name}_{metric_label}_deviation": np.round(deviation_per_class, 6),
+        f"{exp_name}_{metric_label}_variance": np.round(variance_per_class, 6),
+        f"{exp_name}_{metric_label}_deviation": np.round(deviation_per_class, 6),
         f"{exp_name}_{metric_label}_step": points_selected
     }
 

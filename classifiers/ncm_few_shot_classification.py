@@ -39,7 +39,7 @@ def main():
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-    save_results(f"../results/ncm_few_shot_{dataset_prefix}_results.csv", args.shot_number, extractions_number, accuracies, f1_scores)
+    save_results(f"results/ncm_few_shot_{dataset_prefix}_results.csv", args.shot_number, extractions_number, accuracies, f1_scores)
 
     print(classification_report(ground_truth_labels, predictions, digits=4))
 

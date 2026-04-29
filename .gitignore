@@ -20,5 +20,6 @@ __pycache__/
 # PyTorch Computation Outputs
 *.pt
 
+previous_results/
 results/
 sources/
