@@ -6,22 +6,7 @@ import torch
 from datasets import load_dataset
 from transformers import CLIPModel, CLIPProcessor
 
-def find_supervised_keys(features):
-    image_label = "image"
-    text_label = "label"
-    class_label_found = False
-
-    for key in features:
-        if isinstance(features[key], datasets.ClassLabel):
-            text_label = key
-            class_label_found = True
-        if isinstance(features[key], datasets.Image):
-            image_label = key
-        if isinstance(features[key], datasets.Value) and not class_label_found and features[key].dtype == "string":
-            text_label = key
-
-    return image_label, text_label
-
+from utils.dataset_splitting import create_custom_splits
 
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -39,25 +24,24 @@ def main():
 
     args = parser.parse_args()
 
+    model = CLIPModel.from_pretrained(args.model)
+    model.to(device)
+    processor = CLIPProcessor.from_pretrained(args.model)
+
     if args.dataset_path:
         dataset_splits = load_dataset("imagefolder", data_dir=args.dataset_path)
         dataset_name = os.path.basename(os.path.normpath(args.dataset_path))
+        text_label = args.label_col if args.label_col else "label"
     else:
-        dataset_splits = load_dataset(args.dataset_id)
-        dataset_name = args.dataset_id
+        dataset_splits, text_label = create_custom_splits(args.dataset_id)
+        dataset_name = args.dataset_id.split("/")[-1]
+
+    image_label = "image"
 
     splits = list(dataset_splits.keys())
     first_split = splits[0]
 
     features = dataset_splits[first_split].features
-    image_label, text_label = find_supervised_keys(features)
-    if args.label_col is not None:
-        text_label = args.label_col
-
-    model = CLIPModel.from_pretrained(args.model)
-    model.to(device)
-    processor = CLIPProcessor.from_pretrained(args.model)
-
     label_feature = features[text_label]
 
     if isinstance(label_feature, datasets.ClassLabel):
@@ -70,7 +54,6 @@ def main():
     }
 
     text_prompts = [f"A photo of a {label.replace("_", " ")}" for label in unique_labels]
-
     processed_labels = processor(text=text_prompts, return_tensors="pt", padding=True).to(device)
     text_embeddings = model.get_text_features(**processed_labels).cpu()
 
@@ -84,7 +67,7 @@ def main():
         dataset_splits[split] = dataset_splits[split].with_transform(image_preprocess)
 
     for key in dataset_splits:
-        data_loader = torch.utils.data.DataLoader(dataset_splits[key], batch_size=256, shuffle=False, num_workers=16)
+        data_loader = torch.utils.data.DataLoader(dataset_splits[key], batch_size=128, shuffle=False, num_workers=12)
 
         image_embeddings = []
         text_labels = []
