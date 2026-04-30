@@ -52,8 +52,8 @@ def redraw_plot():
     ax.grid(True, linestyle='--', alpha=0.5)
 
     base_prior_cov = np.array([
-        [0.2, 0.0],
-        [0.0, 5.0]
+        [1.25, 0.32],
+        [0.75, 1.43]
     ])
     cov_0 = base_prior_cov * prior_slider.val
     draw_gaussian_contour(mu_0, cov_0, color='blue', label='Prior (Text)')
