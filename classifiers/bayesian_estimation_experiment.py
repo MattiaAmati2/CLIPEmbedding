@@ -33,23 +33,11 @@ def main():
     prior_means = test_file["text_embeddings"]
     prior_covariance_matrices = []
 
-    for i in range(extractions_number):
-        evidence_means, evidence_covariances = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number)
 
-        #distance_matrix = mahalanobis_distance(test_file["image_embeddings"], class_means, class_matrices)
-
-        '''
-        predictions = (distance_matrix.argmin(dim=1))
-        predictions = [class_names[idx.item()] for idx in predictions]
-
-        accuracies.append(accuracy_score(ground_truth_labels, predictions))
-        f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
-        '''
 
     save_results(f"results/bayesian_{dataset_prefix}_results.csv", args.shot_number, extractions_number,
                  accuracies, f1_scores)
 
-    print(classification_report(ground_truth_labels, predictions, digits=4))
 
 if __name__ == '__main__':
     main()
