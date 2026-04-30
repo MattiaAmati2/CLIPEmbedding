@@ -1,0 +1,64 @@
+# ==========================================
+# ViT-B/16 - FGVC-Aircraft (Reg: -3)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch16_FGVC-Aircraft 99 113 -3 8
+./run_test_evaluation.sh openai-clip-vit-base-patch16_FGVC-Aircraft 120 120 -3 16 2>&1 | tee -a output.txt && /
+./run_test_evaluation.sh openai-clip-vit-base-patch16_FGVC-Aircraft 125 122 -3 32 2>&1 | tee -a output.txt && /
+./run_test_evaluation.sh openai-clip-vit-base-patch16_FGVC-Aircraft 127 125 -3 64 2>&1 | tee -a output.txt && /
+
+# ==========================================
+# ViT-B/16 - Food-101 (Reg: -2)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch16_food101 26 35 -2 8 2>&1 | tee -a output.txt && /
+./run_test_evaluation.sh openai-clip-vit-base-patch16_food101 33 40 -2 16 2>&1 | tee -a output.txt && /
+./run_test_evaluation.sh openai-clip-vit-base-patch16_food101 43 43 -2 32 2>&1 | tee -a output.txt && /
+./run_test_evaluation.sh openai-clip-vit-base-patch16_food101 50 53 -2 64 2>&1 | tee -a output.txt && /
+
+# ==========================================
+# ViT-B/16 - Oxford Pets (Reg: -2)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch16_oxford-pets 41 70 -2 8 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch16_oxford-pets 79 79 -2 16 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch16_oxford-pets 84 85 -2 32 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch16_oxford-pets 88 88 -2 64 2>&1 | tee -a output.txt
+
+# ==========================================
+# ViT-B/16 - Stanford Dogs (Reg: -2)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch16_stanford-dogs 45 45 -2 8 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch16_stanford-dogs 53 53 -2 16 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch16_stanford-dogs 58 71 -2 32 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch16_stanford-dogs 67 78 -2 64 2>&1 | tee -a output.txt
+
+# ==========================================
+# ViT-B/32 - FGVC-Aircraft (Reg: -3)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch32_FGVC-Aircraft 119 119 -3 8 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_FGVC-Aircraft 119 119 -3 16 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_FGVC-Aircraft 122 122 -3 32 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_FGVC-Aircraft 118 118 -3 64 2>&1 | tee -a output.txt
+
+# ==========================================
+# ViT-B/32 - Food-101 (Reg: -2)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch32_food101 26 26 -2 8 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_food101 37 40 -2 16 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_food101 48 50 -2 32 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_food101 51 51 -2 64 2>&1 | tee -a output.txt
+
+# ==========================================
+# ViT-B/32 - Oxford Pets (Reg: -2)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch32_oxford-pets 35 39 -2 8 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_oxford-pets 48 79 -2 16 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_oxford-pets 80 83 -2 32 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_oxford-pets 80 80 -2 64 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_oxford-pets 91 91 -2 128 2>&1 | tee -a output.txt
+
+# ==========================================
+# ViT-B/32 - Stanford Dogs (Reg: -2)
+# ==========================================
+./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 35 35 -2 8 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 41 51 -2 16 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 54 55 -2 32 2>&1 | tee -a output.txt
+./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 64 68 -2 64 2>&1 | tee -a output.txt

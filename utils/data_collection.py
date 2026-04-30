@@ -107,3 +107,10 @@ def extract_optimal_metrics(metric_dict, exp_name, metric_label):
     }
 
     return columns_to_add
+
+def save_report_to_csv(report_dict, filename):
+    report_df = pd.DataFrame(report_dict).transpose().round(4)
+    save_path = f"results/{filename}"
+    os.makedirs("results", exist_ok=True)
+    report_df.to_csv(save_path, index=True, index_label="Class_Name")
+    print(f"Classification report saved to: {save_path}")

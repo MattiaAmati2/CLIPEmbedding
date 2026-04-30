@@ -5,7 +5,7 @@ import os
 from pygments.lexer import default
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
-from utils.data_collection import save_results
+from utils.data_collection import save_results, save_report_to_csv
 from utils.classification_preprocessing import get_class_means_and_inv_covariance_matrices, mahalanobis_distance
 
 def main():
@@ -46,7 +46,9 @@ def main():
     save_results(f"results/mahalanobis_ncm_{dataset_prefix}_results.csv", args.shot_number, args.regularization_factor,
                  accuracies, f1_scores)
 
-    print(classification_report(ground_truth_labels, predictions, digits=4))
+    report_dict = classification_report(ground_truth_labels, predictions, output_dict=True)
+    dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
+    save_report_to_csv(report_dict, f"{dataset_prefix}_mhd_ncm_report.csv")
 
 if __name__ == '__main__':
     main()

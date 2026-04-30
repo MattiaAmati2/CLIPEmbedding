@@ -25,7 +25,7 @@ def main():
     parser.add_argument("--shot_number", required=True, type=int)
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--single_point", type=int)
+    group.add_argument("--fixed_points", nargs="+", type=int)
     group.add_argument("--optimal_points_csv", type=str, help="Path to your val_optimal_points.csv")
 
     args = parser.parse_args()
@@ -45,13 +45,25 @@ def main():
 
     configurations = {}
 
-    if args.single_point is not None:
-        configurations[f"Fixed_Step_{args.single_point}"] = {
-            "steps": [args.single_point] * len(class_names),
+    if args.fixed_points is not None:
+
+        optimized_acc_point = args.fixed_points[0]
+        optimized_f1_point = args.fixed_points[1]
+
+        configurations[f"Optimized_Acc_Fixed_Step_{optimized_acc_point}"] = {
+            "steps": [optimized_acc_point] * len(class_names),
             "is_single": True,
             "accs": [],
             "f1s": []
         }
+
+        configurations[f"Optimized_F1_Fixed_Step_{optimized_f1_point}"] = {
+            "steps": [optimized_f1_point] * len(class_names),
+            "is_single": True,
+            "accs": [],
+            "f1s": []
+        }
+
     else:
         df = pd.read_csv(args.optimal_points_csv)
         f1_col = f"{args.shot_number}_shots_f1_step"
@@ -100,7 +112,7 @@ def main():
 
     for config_name, config_data in configurations.items():
         save_results(
-            filename=f"results/{dataset_prefix}_test_evaluation.csv",
+            filename=f"results/{dataset_prefix}_interpolation_evaluation.csv",
             shot_number=args.shot_number,
             extra_metadata=config_name,  # This will output as "Optimized_F1" or "Optimized_Recall" in the CSV
             accuracies=config_data["accs"],

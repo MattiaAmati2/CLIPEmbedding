@@ -2,8 +2,9 @@ import torch
 import os
 import pandas as pd
 import argparse
-
 from sklearn.metrics import classification_report
+
+from utils.data_collection import save_report_to_csv
 
 
 def main():
@@ -28,16 +29,8 @@ def main():
 
     report_dict = classification_report(ground_truth_labels, predictions, output_dict=True)
 
-    report_df = pd.DataFrame(report_dict).transpose().round(4)
     dataset_prefix = os.path.basename(args.filename).replace("_embeddings.pt", "")
-    save_path = f"results/{dataset_prefix}_zero_shot_report.csv"
-
-    os.makedirs("results", exist_ok=True)
-
-    report_df.to_csv(save_path, index=True, index_label="Class_Name")
-
-    print(f"[+] Zero-Shot classification report saved to: {save_path}")
-
+    save_report_to_csv(report_dict, f"{dataset_prefix}_zero_shot_report.csv")
 
 if __name__ == "__main__":
     main()
