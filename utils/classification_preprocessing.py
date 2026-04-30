@@ -30,7 +30,7 @@ def get_class_means(train_file, shot_number):
     return samples_matrix
 
 
-def get_class_means_and_inv_covariance_matrices(train_file, shot_number):
+def get_class_means_and_inv_covariance_matrices(train_file, shot_number, regularization_factor):
     image_embeddings = train_file["image_embeddings"]
     labels = train_file["labels"]
 
@@ -54,7 +54,7 @@ def get_class_means_and_inv_covariance_matrices(train_file, shot_number):
         class_means.append(class_mean)
 
         cov_matrix = torch.cov(selected_embeddings.T)
-        cov_matrix += 10 ** (-2) * torch.eye(512)
+        cov_matrix += (10 ** regularization_factor) * torch.eye(512)
 
         class_matrices.append(torch.linalg.inv(cov_matrix))
 

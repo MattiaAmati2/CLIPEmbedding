@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.ndimage import uniform_filter1d
 
 
-def save_results(filename, shot_number, extractions_number, accuracies, f1_scores):
+def save_results(filename, shot_number, extra_metadata, accuracies, f1_scores):
     file_exists = os.path.isfile(filename)
 
     mu_acc = np.mean(accuracies)
@@ -18,7 +18,7 @@ def save_results(filename, shot_number, extractions_number, accuracies, f1_score
 
     row_data = [
         shot_number,
-        extractions_number,
+        extra_metadata,
         round(mu_acc, 4),
         round(var_acc, 6),
         round(std_acc, 4),
@@ -37,7 +37,7 @@ def save_results(filename, shot_number, extractions_number, accuracies, f1_score
         if not file_exists:
             writer.writerow([
                 "shot_number",
-                "",
+                "regularization_factor",
                 "mu_acc",
                 "var_acc",
                 "std_acc",

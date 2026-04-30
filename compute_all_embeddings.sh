@@ -2,6 +2,7 @@
 
 MODELS=(
     "openai/clip-vit-base-patch16"
+    "openai/clip-vit-base-patch32"
 )
 
 DATASETS=(
