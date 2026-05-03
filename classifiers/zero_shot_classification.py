@@ -1,6 +1,5 @@
 import torch
 import os
-import pandas as pd
 import argparse
 from sklearn.metrics import classification_report
 

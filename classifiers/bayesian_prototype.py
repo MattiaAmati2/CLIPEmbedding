@@ -2,22 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
-
-def update_posterior(mu_prior, cov_prior, cov_obs, points):
-    n = len(points)
-    if n == 0:
-        return mu_prior, cov_prior
-
-    x_bar = np.mean(points, axis=0)
-
-    inv_cov_0 = np.linalg.inv(cov_prior)
-    inv_cov_obs = np.linalg.inv(cov_obs)
-
-    cov_n = np.linalg.inv(inv_cov_0 + (n * inv_cov_obs))
-    mu_n = cov_n @ (inv_cov_0 @ mu_prior + n * (inv_cov_obs @ x_bar))
-
-    return mu_n, cov_n
-
+from utils.classification_preprocessing import update_posterior
 
 fig, ax = plt.subplots(figsize=(7, 7))
 plt.subplots_adjust(bottom=0.25)

@@ -2,7 +2,6 @@ import argparse
 import torch
 import os
 
-from pygments.lexer import default
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 from utils.data_collection import save_results, save_report_to_csv

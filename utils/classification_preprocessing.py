@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import random
 
@@ -76,6 +77,20 @@ def mahalanobis_distance(test_examples, class_means, covariance_matrices):
 
     return torch.stack(all_distances, dim=1)
 
+def update_posterior(mu_prior, cov_prior, cov_obs, points):
+    n = len(points)
+    if n == 0:
+        return mu_prior, cov_prior
+
+    x_bar = np.mean(points, axis=0)
+
+    inv_cov_0 = np.linalg.inv(cov_prior)
+    inv_cov_obs = np.linalg.inv(cov_obs)
+
+    cov_n = np.linalg.inv(inv_cov_0 + (n * inv_cov_obs))
+    mu_n = cov_n @ (inv_cov_0 @ mu_prior + n * (inv_cov_obs @ x_bar))
+
+    return mu_n, cov_n
 
 @torch.no_grad()
 def get_segment_points(start_points, end_points, num_steps=10):
