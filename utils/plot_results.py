@@ -13,8 +13,9 @@ def main():
     parser.add_argument("--group", required=True, help="Column name to group by (each unique value gets a line)")
     parser.add_argument("--zero_shot_file", required=False, help="Zero shot classification report on the same dataset")
 
-    parser.add_argument("--output", default="learning_curve.png", help="Name of the saved image file")
-
+    parser.add_argument("--xlabel", required=False, help="Clean label for the X-axis (LaTeX syntax supported)")
+    parser.add_argument("--ylabel", required=False, help="Clean label for the Y-axis (LaTeX syntax supported)")
+    parser.add_argument("--output", default="learning_curve.pdf", help="Name of the saved image file (use .pdf)")
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):
@@ -36,7 +37,7 @@ def main():
 
     for group_name, group_df in grouped_data:
         group_df = group_df.sort_values(by=args.x)
-        plt.plot(group_df[args.x], group_df[args.y], marker='', linewidth=2, label=f"{args.group}: {group_name}")
+        plt.plot(group_df[args.x], group_df[args.y], marker='', linewidth=2, label=str(group_name))
 
     if args.zero_shot_file and os.path.exists(args.zero_shot_file):
         print(f"Loading Zero-Shot baseline from {args.zero_shot_file}...")
@@ -62,15 +63,22 @@ def main():
         except KeyError as e:
             print(f"Warning: Could not parse zero-shot file correctly. Missing expected structure: {e}")
 
-    plt.xlabel(args.x, fontsize=12, fontweight='bold')
-    plt.ylabel(args.y, fontsize=12, fontweight='bold')
-    plt.title(f"{args.y} vs {args.x} (Grouped by {args.group})", fontsize=14)
+    final_xlabel = args.xlabel if args.xlabel else args.x
+    final_ylabel = args.ylabel if args.ylabel else args.y
+
+    plt.xlabel(final_xlabel, fontsize=14)
+    plt.ylabel(final_ylabel, fontsize=14)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
 
     plt.grid(True, linestyle='--', alpha=0.7)
-    plt.legend(title= args.group)
+
+    if len(grouped_data) > 1 or args.zero_shot_file:
+        plt.legend(fontsize=12)
+
     plt.tight_layout()
 
-    plt.savefig(args.output, dpi=300)
+    plt.savefig(args.output, dpi=300, bbox_inches='tight')
     print(f"Plot saved as '{args.output}'")
 
 
