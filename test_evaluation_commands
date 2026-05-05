@@ -62,3 +62,4 @@
 ./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 41 51 -2 16 2>&1 | tee -a output.txt && /
 ./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 54 55 -2 32 2>&1 | tee -a output.txt && /
 ./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 64 68 -2 64 2>&1 | tee -a output.txt && /
+

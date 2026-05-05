@@ -1,12 +1,13 @@
 import argparse
+
+import numpy as np
 import torch
 import os
 
-from mpmath import extradps
-from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
 
-from utils.data_collection import save_results
-from utils.classification_preprocessing import mahalanobis_distance, get_class_means, \
+from utils.data_collection import save_results, save_confusion_matrix
+from utils.classification_preprocessing import mahalanobis_distance, \
     get_class_means_and_inv_covariance_matrices, update_posterior
 
 
@@ -37,10 +38,13 @@ def main():
     predictions = []
     accuracies = []
     f1_scores = []
+    accumulated_cm = np.zeros((len(class_names), len(class_names)), dtype=int)
 
     for i in range(extractions_number):
         mu_obs, inv_cov_obs = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number, evidence_lambda)
         mu_posterior, inv_cov_posterior = update_posterior(prior_means, prior_inv_covariance_matrix, mu_obs, inv_cov_obs, args.shot_number)
+
+        #print(calculate_distribution_metrics(mu_obs, inv_cov_obs, mu_posterior, inv_cov_posterior))
 
         distance_matrix = mahalanobis_distance(test_file["image_embeddings"], mu_posterior, inv_cov_posterior)
 
@@ -50,11 +54,17 @@ def main():
         accuracies.append(accuracy_score(ground_truth_labels, predictions))
         f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
+        current_cm = confusion_matrix(ground_truth_labels, predictions, labels=class_names)
+        accumulated_cm += current_cm
+
     save_results(f"results/bayesian_classification_{dataset_prefix}.csv", args.shot_number,
                  ["Bayesian", prior_lambda, evidence_lambda],
                  accuracies, f1_scores)
 
-    print(classification_report(ground_truth_labels, predictions))
+    save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, args.shot_number)
+
+    #print(classification_report(ground_truth_labels, predictions))
+
 
 if __name__ == '__main__':
     main()

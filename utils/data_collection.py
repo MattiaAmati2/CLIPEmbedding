@@ -2,6 +2,8 @@ import csv
 import os
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 from scipy.ndimage import uniform_filter1d
 
 
@@ -114,3 +116,22 @@ def save_report_to_csv(report_dict, filename):
     os.makedirs("results", exist_ok=True)
     report_df.to_csv(save_path, index=True, index_label="Class_Name")
     print(f"Classification report saved to: {save_path}")
+
+def save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, shot_number):
+    plt.figure(figsize=(12, 10))
+
+    # Create a heatmap. Set annot=False because 16 runs will make the numbers large/cluttered.
+    # The color gradient (cmap="Blues") is enough to spot the clusters.
+    sns.heatmap(accumulated_cm, annot=False, cmap="Blues",
+                xticklabels=class_names, yticklabels=class_names)
+
+    plt.title(f"Accumulated Confusion Matrix (16 Runs)\nPosterior Classification ({shot_number}-shot)")
+    plt.ylabel('True Label')
+    plt.xlabel('Predicted Label')
+    plt.tight_layout()
+
+    cm_filename = f"results/cm_posterior_{dataset_prefix}_{shot_number}shot.png"
+    plt.savefig(cm_filename, dpi=300)
+    plt.close()
+
+    print(f"Aggregated confusion matrix saved to {cm_filename}")

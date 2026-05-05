@@ -9,14 +9,14 @@ fi
 SOURCES_PREFIX=$1
 
 TRAIN="sources/${SOURCES_PREFIX}_train_embeddings.pt"
-VALIDATION="sources/${SOURCES_PREFIX}_val_embeddings.pt"
+VALIDATION="sources/${SOURCES_PREFIX}_validation_embeddings.pt"
 
 echo "Starting Experiments for: $SOURCES_PREFIX"
 
 for shots in 8 16 32 64
 do
-    #PYTHONPATH=$(pwd) python classifiers/mahalanobis_distance_ncm.py --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
-    PYTHONPATH=$(pwd) python classifiers/bayesian_estimation_experiment.py --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
+    python -m classifiers.mahalanobis_distance_ncm --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
+    python -m classifiers.bayesian_estimation_experiment --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
 done
 
 echo "======================================"

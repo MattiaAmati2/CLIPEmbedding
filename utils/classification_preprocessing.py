@@ -64,13 +64,13 @@ def get_class_means_and_inv_covariance_matrices(train_file, shot_number, regular
     return samples_matrix, class_matrices
 
 
-def mahalanobis_distance(test_examples, class_means, covariance_matrices):
+def mahalanobis_distance(test_examples, class_means, inverse_covariance_matrices):
     all_distances = []
 
     #compute the distance from a single class of all the examples at once
     for class_idx in range(len(class_means)):
         mean = class_means[class_idx]
-        inv_cov = covariance_matrices[class_idx]
+        inv_cov = inverse_covariance_matrices[class_idx]
 
         distances = torch.sum((test_examples - mean) @ inv_cov * (test_examples - mean), dim=1)
         all_distances.append(distances)
