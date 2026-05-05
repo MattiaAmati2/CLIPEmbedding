@@ -15,16 +15,8 @@ echo "Starting Experiments for: $SOURCES_PREFIX"
 
 for shots in 8 16 32 64
 do
-    echo "======================================"
-    echo "Running extraction for $shots shots..."
-
-    for reg_factor in -8 -7 -6 -5 -4 -3 -2
-    do
-      echo "======================================"
-      echo "Running extraction with regularization factor $reg_factor ..."
-
-      PYTHONPATH=$(pwd) python classifiers/mahalanobis_distance_ncm.py --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots" --regularization_factor "$reg_factor"
-    done
+    #PYTHONPATH=$(pwd) python classifiers/mahalanobis_distance_ncm.py --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
+    PYTHONPATH=$(pwd) python classifiers/bayesian_estimation_experiment.py --train_filename "$TRAIN" --test_filename "$VALIDATION" --shot_number "$shots"
 done
 
 echo "======================================"

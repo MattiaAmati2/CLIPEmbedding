@@ -77,20 +77,36 @@ def mahalanobis_distance(test_examples, class_means, covariance_matrices):
 
     return torch.stack(all_distances, dim=1)
 
-def update_posterior(mu_prior, cov_prior, cov_obs, points):
-    n = len(points)
-    if n == 0:
-        return mu_prior, cov_prior
 
-    x_bar = np.mean(points, axis=0)
+def ensure_tensor(x):
+    if isinstance(x, torch.Tensor): return x
+    if isinstance(x, list):
+        if len(x) == 1 and isinstance(x[0], torch.Tensor):
+            return x[0]
+        elif len(x) > 0 and isinstance(x[0], torch.Tensor):
+            return torch.stack(x)
+    return torch.as_tensor(x, dtype=torch.float32)
 
-    inv_cov_0 = np.linalg.inv(cov_prior)
-    inv_cov_obs = np.linalg.inv(cov_obs)
 
-    cov_n = np.linalg.inv(inv_cov_0 + (n * inv_cov_obs))
-    mu_n = cov_n @ (inv_cov_0 @ mu_prior + n * (inv_cov_obs @ x_bar))
+def update_posterior(mu_prior, inv_cov_prior, class_means, inv_cov_evidence, shot_number):
+    mu_prior = ensure_tensor(mu_prior)
+    inv_cov_prior = ensure_tensor(inv_cov_prior)
+    inv_cov_evidence = ensure_tensor(inv_cov_evidence)
+    class_means = ensure_tensor(class_means)
 
-    return mu_n, cov_n
+    mu_prior = mu_prior.unsqueeze(1)
+    class_means = class_means.unsqueeze(1)
+
+    inv_cov_n = inv_cov_prior + (shot_number * inv_cov_evidence)
+    cov_n = torch.linalg.inv(inv_cov_n)
+
+    term1 = mu_prior @ inv_cov_prior
+    term2 = shot_number * (class_means @ inv_cov_evidence)
+    sum_terms = term1 + term2
+
+    mu_n= (sum_terms @ cov_n).squeeze(1)
+
+    return mu_n, inv_cov_n
 
 @torch.no_grad()
 def get_segment_points(start_points, end_points, num_steps=10):
