@@ -21,6 +21,7 @@ def main():
     test_file = torch.load(args.test_filename)
 
     dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
+    dataset_prefix = "mahalanobis_" + str(dataset_prefix)
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
@@ -49,7 +50,7 @@ def main():
         accumulated_cm += current_cm
 
 
-    save_results(f"results/mahalanobis_ncm_{dataset_prefix}_results.csv", args.shot_number, args.regularization_factor,
+    save_results(f"results/{dataset_prefix}_results.csv", args.shot_number, args.regularization_factor,
                  accuracies, f1_scores)
 
     save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, args.shot_number)

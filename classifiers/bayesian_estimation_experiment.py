@@ -22,17 +22,21 @@ def main():
     test_file = torch.load(args.test_filename)
 
     dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
+    dataset_prefix = "bayesian_" + str(dataset_prefix)
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
-    prior_lambda = 7
     evidence_lambda = -2
+
+    prior_pseudo_count = args.shot_number
+    baseline_shot_precision = 1.0 / (10**evidence_lambda)
+    prior_precision_scalar = prior_pseudo_count * baseline_shot_precision
+    prior_inv_covariance_matrix = torch.eye(512) * prior_precision_scalar
+
     prior_means = test_file["text_embeddings"]
-    prior_covariance_matrix = torch.eye(512) * 10**prior_lambda
-    prior_inv_covariance_matrix = torch.linalg.inv(prior_covariance_matrix)
 
     extractions_number = 16
     predictions = []
@@ -57,8 +61,8 @@ def main():
         current_cm = confusion_matrix(ground_truth_labels, predictions, labels=class_names)
         accumulated_cm += current_cm
 
-    save_results(f"results/bayesian_classification_{dataset_prefix}.csv", args.shot_number,
-                 ["Bayesian", prior_lambda, evidence_lambda],
+    save_results(f"results/{dataset_prefix}.csv", args.shot_number,
+                 ["Bayesian", prior_precision_scalar, evidence_lambda],
                  accuracies, f1_scores)
 
     save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, args.shot_number)
