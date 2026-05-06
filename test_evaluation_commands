@@ -63,3 +63,25 @@
 ./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 54 55 -2 32 2>&1 | tee -a output.txt && /
 ./run_test_evaluation.sh openai-clip-vit-base-patch32_stanford-dogs 64 68 -2 64 2>&1 | tee -a output.txt && /
 
+./run_experiment.sh openai-clip-vit-base-patch16_FGVC-Aircraft &&
+./run_experiment.sh openai-clip-vit-base-patch16_food101 &&
+./run_experiment.sh openai-clip-vit-base-patch16_oxford-pets &&
+./run_experiment.sh openai-clip-vit-base-patch16_stanford-dogs &&
+./run_experiment.sh openai-clip-vit-base-patch32_FGVC-Aircraft &&
+./run_experiment.sh openai-clip-vit-base-patch32_food101 &&
+./run_experiment.sh openai-clip-vit-base-patch32_oxford-pets &&
+./run_experiment.sh openai-clip-vit-base-patch32_stanford-dogs
+
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_oxford-pets_val_embeddings.pt
+
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch16_FGVC-Aircraft_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch16_food101_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch16_oxford-pets_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch16_stanford-dogs_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_FGVC-Aircraft_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_food101_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_oxford-pets_test_embeddings.pt &&
+python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_stanford-dogs_test_embeddings.pt
+
+
+

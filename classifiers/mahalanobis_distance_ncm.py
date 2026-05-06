@@ -22,6 +22,8 @@ def main():
 
     dataset_prefix = os.path.basename(args.test_filename).replace("_embeddings.pt", "")
     dataset_prefix = "mahalanobis_" + str(dataset_prefix)
+    dataset_directory = os.path.basename(args.test_filename).rsplit("_", 2)[0]
+
 
     class_names = test_file["class_names"]
     ground_truth_labels = test_file["labels"]
@@ -34,26 +36,26 @@ def main():
     f1_scores = []
     accumulated_cm = np.zeros((len(class_names), len(class_names)), dtype=int)
 
-    for i in range(extractions_number):
-        class_means, class_matrices = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number, args.regularization_factor)
+    with torch.no_grad():
+        for i in range(extractions_number):
+            class_means, class_matrices = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number, args.regularization_factor)
 
-        distance_matrix = mahalanobis_distance(test_file["image_embeddings"], class_means, class_matrices)
+            distance_matrix = mahalanobis_distance(test_file["image_embeddings"], class_means, class_matrices)
 
-        predictions = (distance_matrix.argmin(dim=1))
+            predictions = (distance_matrix.argmin(dim=1))
 
-        predictions = [class_names[idx.item()] for idx in predictions]
+            predictions = [class_names[idx.item()] for idx in predictions]
 
-        accuracies.append(accuracy_score(ground_truth_labels, predictions))
-        f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
+            accuracies.append(accuracy_score(ground_truth_labels, predictions))
+            f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
 
-        current_cm = confusion_matrix(ground_truth_labels, predictions, labels=class_names)
-        accumulated_cm += current_cm
+            current_cm = confusion_matrix(ground_truth_labels, predictions, labels=class_names)
+            accumulated_cm += current_cm
 
+        save_results(f"results/{dataset_directory}/{dataset_prefix}_results.csv", args.shot_number, args.regularization_factor,
+                     accuracies, f1_scores)
 
-    save_results(f"results/{dataset_prefix}_results.csv", args.shot_number, args.regularization_factor,
-                 accuracies, f1_scores)
-
-    save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, args.shot_number)
+        save_confusion_matrix(accumulated_cm, dataset_directory, dataset_prefix, class_names, args.shot_number)
 
     #report_dict = classification_report(ground_truth_labels, predictions, output_dict=True)
     #save_report_to_csv(report_dict, f"{dataset_prefix}_mhd_ncm_report.csv")

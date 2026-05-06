@@ -32,6 +32,8 @@ for agg_file in ${RESULTS_DIR}/*/*_few_shots_aggregate_results.csv; do
         --csv "$agg_file" \
         --x "shot_number" \
         --y "mu_acc" \
+        --xlabel "Shots" \
+        --ylabel "$\mu_{acc}$" \
         --group "distance" \
         --zero_shot_file "$zero_shot_file" \
         --output "$out_acc"
@@ -42,6 +44,8 @@ for agg_file in ${RESULTS_DIR}/*/*_few_shots_aggregate_results.csv; do
         --csv "$agg_file" \
         --x "shot_number" \
         --y "mu_f1" \
+        --xlabel "Shots" \
+        --ylabel "$\mu_{F1}$" \
         --group "distance" \
         --zero_shot_file "$zero_shot_file" \
         --output "$out_f1"

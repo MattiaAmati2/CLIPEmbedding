@@ -117,7 +117,7 @@ def save_report_to_csv(report_dict, filename):
     report_df.to_csv(save_path, index=True, index_label="Class_Name")
     print(f"Classification report saved to: {save_path}")
 
-def save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, shot_number):
+def save_confusion_matrix(accumulated_cm, dataset_directory, dataset_prefix, class_names, shot_number):
     plt.figure(figsize=(12, 10))
 
     # Create a heatmap. Set annot=False because 16 runs will make the numbers large/cluttered.
@@ -130,7 +130,7 @@ def save_confusion_matrix(accumulated_cm, dataset_prefix, class_names, shot_numb
     plt.xlabel('Predicted Label')
     plt.tight_layout()
 
-    cm_filename = f"results/cm_posterior_{dataset_prefix}_{shot_number}shot.png"
+    cm_filename = f"results/{dataset_directory}/cm_{dataset_prefix}_{shot_number}shot.png"
     plt.savefig(cm_filename, dpi=300)
     plt.close()
 
