@@ -83,5 +83,15 @@ python -m classifiers.zero_shot_classification --filename sources/openai-clip-vi
 python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_oxford-pets_test_embeddings.pt &&
 python -m classifiers.zero_shot_classification --filename sources/openai-clip-vit-base-patch32_stanford-dogs_test_embeddings.pt
 
+python -m utils.plot_results \
+    --csv results/openai-clip-vit-base-patch16_FGVC-Aircraft/bayesian_openai-clip-vit-base-patch16_FGVC-Aircraft_val.csv \
+    --x prior_weight \
+    --y mu_f1 \
+    --xlabel "Prior Weight" \
+    --ylabel "$\mu_{F1}$" \
+    --group shot_number \
+    --zero_shot_file results/openai-clip-vit-base-patch16_FGVC-Aircraft/openai-clip-vit-base-patch16_FGVC-Aircraft_test_zero_shot_report.csv \
+    --output "plots/bayesian_interpolation_aircraft_f1_curve.png"
+
 
 

@@ -39,7 +39,7 @@ def save_results(filename, shot_number, extra_metadata, accuracies, f1_scores):
         if not file_exists:
             writer.writerow([
                 "shot_number",
-                "regularization_factor",
+                "prior_weight",
                 "mu_acc",
                 "var_acc",
                 "std_acc",

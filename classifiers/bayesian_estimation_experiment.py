@@ -18,6 +18,9 @@ def main():
     parser.add_argument("--shot_number", required=True, type=int)
 
     args = parser.parse_args()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     train_file = torch.load(args.train_filename)
     test_file = torch.load(args.test_filename)
 
@@ -30,47 +33,70 @@ def main():
     if not isinstance(ground_truth_labels[0], str):
         ground_truth_labels = [class_names[label.item()] for label in ground_truth_labels]
 
-
-    target_prior_percentage = 0.5
-    evidence_lambda = -2
-
-    if target_prior_percentage >= 1.0:
-        prior_pseudo_count = 1e9  # Effectively 100% prior
-    else:
-        prior_pseudo_count = args.shot_number * (target_prior_percentage / (1.0 - target_prior_percentage))
-
-    baseline_shot_precision = 1.0 / (10**evidence_lambda)
-    prior_precision_scalar = prior_pseudo_count * baseline_shot_precision
-    prior_inv_covariance_matrix = torch.eye(512) * prior_precision_scalar
+    test_file["image_embeddings"] = test_file["image_embeddings"].to(device)
 
     prior_means = test_file["text_embeddings"]
-
     extractions_number = 16
-    accuracies = []
-    f1_scores = []
-    accumulated_cm = np.zeros((len(class_names), len(class_names)), dtype=int)
+
+    evidence_lambda = -2
+    target_percentages = [i/100 for i in range(100)]
+
+    baseline_shot_precision = 1.0 / (10 ** evidence_lambda)
+    results = {
+        weight: {
+            "accuracies": [],
+            "f1_scores": [],
+            "cm": np.zeros((len(class_names), len(class_names)), dtype=int)
+        }
+        for weight in target_percentages
+    }
 
     with torch.no_grad():
         for i in range(extractions_number):
-            mu_obs, inv_cov_obs = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number, evidence_lambda)
-            mu_posterior, inv_cov_posterior = update_posterior(prior_means, prior_inv_covariance_matrix, mu_obs, inv_cov_obs, args.shot_number)
 
-            distance_matrix = mahalanobis_distance(test_file["image_embeddings"], mu_posterior, inv_cov_posterior)
+            # Compute the evidence once for this extraction
+            mu_obs, inv_cov_obs = get_class_means_and_inv_covariance_matrices(train_file, args.shot_number,
+                                                                              evidence_lambda)
 
-            predictions = (distance_matrix.argmin(dim=1))
-            predictions = [class_names[idx.item()] for idx in predictions]
+            # Test all text weights against this single extraction
+            for target_pct in target_percentages:
 
-            accuracies.append(accuracy_score(ground_truth_labels, predictions))
-            f1_scores.append(f1_score(ground_truth_labels, predictions, average="macro"))
+                if target_pct >= 1.0:
+                    prior_pseudo_count = 1e9
+                else:
+                    prior_pseudo_count = args.shot_number * (target_pct / (1.0 - target_pct))
 
-            current_cm = confusion_matrix(ground_truth_labels, predictions, labels=class_names)
-            accumulated_cm += current_cm
+                prior_precision_scalar = prior_pseudo_count * baseline_shot_precision
+                prior_inv_covariance_matrix = torch.eye(512) * prior_precision_scalar
 
-        save_confusion_matrix(accumulated_cm, dataset_directory, dataset_prefix, class_names, args.shot_number)
+                mu_posterior, inv_cov_posterior = update_posterior(
+                    prior_means, prior_inv_covariance_matrix, mu_obs, inv_cov_obs, args.shot_number
+                )
 
-        save_results(f"results/{dataset_directory}/{dataset_prefix}.csv", args.shot_number,
-                     ["Bayesian", prior_precision_scalar, evidence_lambda],
-                     accuracies, f1_scores)
+                mu_posterior = mu_posterior.to(device)
+                inv_cov_posterior = inv_cov_posterior.to(device)
+
+                distance_matrix = mahalanobis_distance(test_file["image_embeddings"], mu_posterior, inv_cov_posterior)
+
+                # Get predictions
+                predictions = distance_matrix.argmin(dim=1).cpu()
+                predictions_names = [class_names[idx.item()] for idx in predictions]
+
+                # Store metrics
+                results[target_pct]["accuracies"].append(accuracy_score(ground_truth_labels, predictions_names))
+                results[target_pct]["f1_scores"].append(
+                    f1_score(ground_truth_labels, predictions_names, average="macro"))
+                results[target_pct]["cm"] += confusion_matrix(ground_truth_labels, predictions_names,
+                                                              labels=class_names)
+
+                del distance_matrix
+
+
+        for weight in target_percentages:
+            #save_confusion_matrix(results[weight]["cm"], dataset_directory, dataset_prefix, class_names, args.shot_number)
+
+            save_results(f"results/{dataset_directory}/{dataset_prefix}.csv", args.shot_number,
+                         weight, results[weight]["accuracies"], results[weight]["f1_scores"])
 
 if __name__ == '__main__':
     main()
