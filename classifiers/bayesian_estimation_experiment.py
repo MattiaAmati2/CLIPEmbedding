@@ -4,9 +4,9 @@ import numpy as np
 import torch
 import os
 
-from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
-from utils.data_collection import save_results, save_confusion_matrix
+from utils.data_collection import save_results
 from utils.classification_preprocessing import mahalanobis_distance, \
     get_class_means_and_inv_covariance_matrices, update_posterior
 
@@ -39,7 +39,9 @@ def main():
     extractions_number = 16
 
     evidence_lambda = -2
-    target_percentages = [i/100 for i in range(100)]
+
+    # This is the list to freely toggle as inputs
+    target_evidence_percentages = [i/100 for i in range(100)]
 
     baseline_shot_precision = 1.0 / (10 ** evidence_lambda)
     results = {
@@ -48,7 +50,7 @@ def main():
             "f1_scores": [],
             "cm": np.zeros((len(class_names), len(class_names)), dtype=int)
         }
-        for weight in target_percentages
+        for weight in target_evidence_percentages
     }
 
     with torch.no_grad():
@@ -59,12 +61,17 @@ def main():
                                                                               evidence_lambda)
 
             # Test all text weights against this single extraction
-            for target_pct in target_percentages:
+            for ev_pct in target_evidence_percentages:
 
-                if target_pct >= 1.0:
+                if ev_pct >= 1.0:
+                    # 100% Evidence means we completely mute the Prior
+                    prior_pseudo_count = 0.0
+                elif ev_pct <= 0.0:
+                    # 0% Evidence means the Prior dominates completely
                     prior_pseudo_count = 1e9
                 else:
-                    prior_pseudo_count = args.shot_number * (target_pct / (1.0 - target_pct))
+                    # The flipped algebraic formula: k = n * ((1 - W_evidence) / W_evidence)
+                    prior_pseudo_count = args.shot_number * ((1.0 - ev_pct) / ev_pct)
 
                 prior_precision_scalar = prior_pseudo_count * baseline_shot_precision
                 prior_inv_covariance_matrix = torch.eye(512) * prior_precision_scalar
@@ -83,16 +90,16 @@ def main():
                 predictions_names = [class_names[idx.item()] for idx in predictions]
 
                 # Store metrics
-                results[target_pct]["accuracies"].append(accuracy_score(ground_truth_labels, predictions_names))
-                results[target_pct]["f1_scores"].append(
+                results[ev_pct]["accuracies"].append(accuracy_score(ground_truth_labels, predictions_names))
+                results[ev_pct]["f1_scores"].append(
                     f1_score(ground_truth_labels, predictions_names, average="macro"))
-                results[target_pct]["cm"] += confusion_matrix(ground_truth_labels, predictions_names,
+                results[ev_pct]["cm"] += confusion_matrix(ground_truth_labels, predictions_names,
                                                               labels=class_names)
 
                 del distance_matrix
 
 
-        for weight in target_percentages:
+        for weight in target_evidence_percentages:
             #save_confusion_matrix(results[weight]["cm"], dataset_directory, dataset_prefix, class_names, args.shot_number)
 
             save_results(f"results/{dataset_directory}/{dataset_prefix}.csv", args.shot_number,

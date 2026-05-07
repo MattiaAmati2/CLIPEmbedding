@@ -94,4 +94,15 @@ python -m utils.plot_results \
     --output "plots/bayesian_interpolation_aircraft_f1_curve.png"
 
 
+python -m utils.plot_results \
+    --csv results/openai-clip-vit-base-patch16_food101/bayesian_openai-clip-vit-base-patch16_food101_val.csv \
+    --x prior_weight \
+    --y mu_f1 \
+    --xlabel "Prior Weight" \
+    --ylabel "$\mu_{F1}$" \
+    --group shot_number \
+    --zero_shot_file results/openai-clip-vit-base-patch16_food101/openai-clip-vit-base-patch16_food101_test_zero_shot_report.csv \
+    --output "plots/bayesian_interpolation_food_f1_curve.png"
+
+
 
