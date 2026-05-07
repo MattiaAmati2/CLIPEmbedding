@@ -135,3 +135,21 @@ def save_confusion_matrix(accumulated_cm, dataset_directory, dataset_prefix, cla
     plt.close()
 
     print(f"Aggregated confusion matrix saved to {cm_filename}")
+
+
+def read_optimal_weight(base_prefix, shot_number):
+    weights_df = pd.read_csv("results/bayesian_evidence_weights.csv")
+
+    matching_row = weights_df[weights_df["prefix"] == base_prefix]
+    if matching_row.empty:
+        raise ValueError(f"Could not find prefix '{base_prefix}' in the CSV.")
+
+    shot_column_name = f"shot_{shot_number}"
+    if shot_column_name not in weights_df.columns:
+        raise ValueError(f"Column '{shot_column_name}' not found in the CSV.")
+
+    optimal_evidence_pct = matching_row.iloc[0][shot_column_name]
+    print(f"Loaded Optimal Evidence Weight for {base_prefix} ({shot_number}-shot): {optimal_evidence_pct}")
+
+    target_evidence_percentages = [optimal_evidence_pct]
+    return target_evidence_percentages

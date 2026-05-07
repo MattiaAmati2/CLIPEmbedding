@@ -6,7 +6,7 @@ import os
 
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
-from utils.data_collection import save_results
+from utils.data_collection import save_results, read_optimal_weight, save_confusion_matrix
 from utils.classification_preprocessing import mahalanobis_distance, \
     get_class_means_and_inv_covariance_matrices, update_posterior
 
@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--train_filename", required=True, type=str)
     parser.add_argument("--test_filename", required=True, type=str)
     parser.add_argument("--shot_number", required=True, type=int)
+    parser.add_argument("--test_evaluation", default=False, type=bool)
 
     args = parser.parse_args()
 
@@ -40,8 +41,10 @@ def main():
 
     evidence_lambda = -2
 
-    # This is the list to freely toggle as inputs
-    target_evidence_percentages = [i/100 for i in range(100)]
+    if args.test_evaluation:
+        target_evidence_percentages = read_optimal_weight(dataset_directory, args.shot_number)
+    else:
+        target_evidence_percentages = [0.5, 0.75]
 
     baseline_shot_precision = 1.0 / (10 ** evidence_lambda)
     results = {
@@ -100,7 +103,7 @@ def main():
 
 
         for weight in target_evidence_percentages:
-            #save_confusion_matrix(results[weight]["cm"], dataset_directory, dataset_prefix, class_names, args.shot_number)
+            save_confusion_matrix(results[weight]["cm"], dataset_directory, dataset_prefix, class_names, args.shot_number)
 
             save_results(f"results/{dataset_directory}/{dataset_prefix}.csv", args.shot_number,
                          weight, results[weight]["accuracies"], results[weight]["f1_scores"])
