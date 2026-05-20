@@ -44,7 +44,7 @@ def main():
     if args.test_evaluation:
         target_evidence_percentages = read_optimal_weight(dataset_directory, args.shot_number)
     else:
-        target_evidence_percentages = [0.5, 0.75]
+        target_evidence_percentages = [0.5]
 
     baseline_shot_precision = 1.0 / (10 ** evidence_lambda)
     results = {
@@ -103,7 +103,7 @@ def main():
 
 
         for weight in target_evidence_percentages:
-            save_confusion_matrix(results[weight]["cm"], dataset_directory, dataset_prefix, class_names, args.shot_number)
+            #save_confusion_matrix(results[weight]["cm"], dataset_directory, dataset_prefix, class_names, args.shot_number)
 
             save_results(f"results/{dataset_directory}/{dataset_prefix}.csv", args.shot_number,
                          weight, results[weight]["accuracies"], results[weight]["f1_scores"])

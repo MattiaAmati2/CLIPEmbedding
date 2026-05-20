@@ -13,8 +13,8 @@ for agg_file in ${RESULTS_DIR}/*/interpolation_experiment_*_complete.csv; do
     current_dir=$(dirname "$agg_file")
 
     filename=$(basename "$agg_file")
-    prefix=${filename%_val.csv}
-    prefix=${prefix#bayesian_}
+    prefix=${filename%complete.csv}
+    prefix=${prefix#interpolation_experiment_}
 
     echo "--------------------------------------------------"
     echo "Generating plots for: $prefix"
