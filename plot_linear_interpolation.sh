@@ -13,7 +13,7 @@ for agg_file in ${RESULTS_DIR}/*/interpolation_experiment_*_complete.csv; do
     current_dir=$(dirname "$agg_file")
 
     filename=$(basename "$agg_file")
-    prefix=${filename%complete.csv}
+    prefix=${filename%_complete.csv}
     prefix=${prefix#interpolation_experiment_}
 
     echo "--------------------------------------------------"
